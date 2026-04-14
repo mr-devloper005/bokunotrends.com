@@ -15,6 +15,8 @@ export const storageKeys = {
   adSaves: 'nexus-ad-saves',
   theme: 'nexus-theme',
   settings: 'nexus-settings',
+  /** Preferred region for classifieds (e.g. Dhaka); empty = all Bangladesh. */
+  classifiedRegion: 'classified-pref-region',
 }
 
 export function loadFromStorage<T>(key: string, fallback: T): T {

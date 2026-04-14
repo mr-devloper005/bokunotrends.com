@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Search, Menu, X, User, FileText, Building2, LayoutGrid, Tag, Image as ImageIcon, ChevronRight, Sparkles, MapPin, Plus } from 'lucide-react'
+import { Search, Menu, X, User, FileText, Building2, LayoutGrid, Tag, Image as ImageIcon, ChevronRight, MapPin, Plus, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/auth-context'
 import { SITE_CONFIG, type TaskKey } from '@/lib/site-config'
@@ -68,22 +68,24 @@ const variantClasses = {
 
 const directoryPalette = {
   'directory-clean': {
-    shell: 'border-b border-slate-200 bg-white/94 text-slate-950 shadow-[0_1px_0_rgba(15,23,42,0.04)] backdrop-blur-xl',
-    logo: 'rounded-2xl border border-slate-200 bg-slate-50',
-    nav: 'text-slate-600 hover:text-slate-950',
-    search: 'border border-slate-200 bg-slate-50 text-slate-600',
-    cta: 'bg-slate-950 text-white hover:bg-slate-800',
-    post: 'border border-slate-200 bg-white text-slate-950 hover:bg-slate-50',
-    mobile: 'border-t border-slate-200 bg-white',
+    shell: 'border-b border-white/10 bg-[#051B15] text-white shadow-[0_1px_0_rgba(0,0,0,0.2)] backdrop-blur-xl xl:border-r',
+    logo: 'rounded-xl border border-white/15 bg-white/10',
+    nav: 'text-emerald-100/90 hover:text-white',
+    search: 'border border-white/12 bg-white/10 text-emerald-50',
+    cta: 'bg-[#00A86B] text-white hover:bg-[#009060]',
+    post: 'border border-white/12 bg-white/8 text-white hover:bg-white/14',
+    mobile: 'border-t border-white/10 bg-[#051B15]',
+    navActive: 'bg-[#00A86B] text-white',
   },
   'market-utility': {
-    shell: 'border-b border-[#d7deca] bg-[#f4f6ef]/96 text-[#1f2617] shadow-[0_1px_0_rgba(64,76,34,0.06)] backdrop-blur-xl',
-    logo: 'rounded-xl border border-[#d7deca] bg-white',
-    nav: 'text-[#56604b] hover:text-[#1f2617]',
-    search: 'border border-[#d7deca] bg-white text-[#56604b]',
-    cta: 'bg-[#1f2617] text-[#edf5dc] hover:bg-[#2f3a24]',
-    post: 'border border-[#d7deca] bg-white text-[#1f2617] hover:bg-[#eef2e4]',
-    mobile: 'border-t border-[#d7deca] bg-[#f4f6ef]',
+    shell: 'border-b border-white/10 bg-[#051B15] text-white shadow-[0_1px_0_rgba(0,0,0,0.2)] backdrop-blur-xl xl:border-r',
+    logo: 'rounded-xl border border-white/15 bg-white/10',
+    nav: 'text-emerald-100/90 hover:text-white',
+    search: 'border border-white/12 bg-white/10 text-emerald-50',
+    cta: 'bg-[#00A86B] text-white hover:bg-[#009060]',
+    post: 'border border-white/12 bg-white/8 text-white hover:bg-white/14',
+    mobile: 'border-t border-white/10 bg-[#051B15]',
+    navActive: 'bg-[#00A86B] text-white',
   },
 } as const
 
@@ -94,7 +96,7 @@ export function Navbar() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const pathname = usePathname()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, hasHydrated, logout } = useAuth()
   const { recipe } = getFactoryState()
 
   const navigation = useMemo(() => SITE_CONFIG.tasks.filter((task) => task.enabled && task.key !== 'profile'), [])
@@ -104,7 +106,6 @@ export function Navbar() {
     href: task.route,
     icon: taskIcons[task.key] || LayoutGrid,
   }))
-  const primaryTask = SITE_CONFIG.tasks.find((task) => task.key === recipe.primaryTask && task.enabled) || primaryNavigation[0]
   const isDirectoryProduct = recipe.homeLayout === 'listing-home' || recipe.homeLayout === 'classified-home'
 
   if (isDirectoryProduct) {
@@ -127,15 +128,14 @@ export function Navbar() {
             </div>
 
             <div className="flex shrink-0 items-center gap-2">
-              {!isAuthenticated ? (
-                <Button size="sm" asChild className={cn('rounded-full', palette.cta)}>
-                  <Link href="/register">
-                    <Plus className="mr-1 h-4 w-4" />
-                    Add Listing
-                  </Link>
+              {!hasHydrated ? (
+                <div className="h-9 w-28 animate-pulse rounded-full bg-white/10" aria-hidden />
+              ) : !isAuthenticated ? (
+                <Button size="sm" variant="ghost" asChild className="rounded-full text-white hover:bg-white/10">
+                  <Link href="/login">Get Started</Link>
                 </Button>
               ) : (
-                <NavbarAuthControls />
+                <NavbarAuthControls variant="classified" />
               )}
               <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
                 {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -153,12 +153,26 @@ export function Navbar() {
                 {mobileNavigation.map((item) => {
                   const isActive = pathname.startsWith(item.href)
                   return (
-                    <Link key={item.name} href={item.href} onClick={() => setIsMobileMenuOpen(false)} className={cn('flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-colors', isActive ? 'bg-foreground text-background' : palette.post)}>
+                    <Link key={item.name} href={item.href} onClick={() => setIsMobileMenuOpen(false)} className={cn('flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-colors', isActive ? palette.navActive : palette.post)}>
                       <item.icon className="h-5 w-5" />
                       {item.name}
                     </Link>
                   )
                 })}
+                {isAuthenticated ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="mt-2 w-full justify-center rounded-full border border-white/15 text-white hover:bg-white/10"
+                    onClick={() => {
+                      logout()
+                      setIsMobileMenuOpen(false)
+                    }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign out
+                  </Button>
+                ) : null}
               </div>
             </div>
           )}
@@ -176,20 +190,13 @@ export function Navbar() {
               </div>
             </Link>
 
-            <div className={cn('mt-7 flex items-center gap-3 rounded-[1.4rem] px-4 py-3 text-sm', palette.search)}>
+            <Link href="/search" className={cn('mt-7 flex items-center gap-3 rounded-[1.4rem] px-4 py-3 text-sm transition hover:opacity-95', palette.search)}>
               <Search className="h-4 w-4 shrink-0" />
               <div className="min-w-0">
-                <div className="truncate font-medium">Find local businesses</div>
-                <div className="truncate text-xs opacity-70">Search by service, category, or city</div>
+                <div className="truncate font-medium">Search to buy</div>
+                <div className="truncate text-xs opacity-70">Find ads, categories, and locations</div>
               </div>
-            </div>
-
-            {primaryTask ? (
-              <Link href={primaryTask.route} className="mt-5 inline-flex items-center gap-2 self-start rounded-full border border-current/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] opacity-75">
-                <Sparkles className="h-3.5 w-3.5" />
-                {primaryTask.label}
-              </Link>
-            ) : null}
+            </Link>
 
             <nav className="mt-8 space-y-2">
               {primaryNavigation.map((task) => {
@@ -201,7 +208,7 @@ export function Navbar() {
                     href={task.route}
                     className={cn(
                       'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-colors',
-                      isActive ? 'bg-foreground text-background' : palette.post,
+                      isActive ? palette.navActive : palette.post,
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
@@ -215,27 +222,33 @@ export function Navbar() {
               <div className={cn('rounded-[1.6rem] px-4 py-4 text-sm', palette.post)}>
                 <div className="flex items-center gap-2 font-semibold">
                   <MapPin className="h-4 w-4" />
-                  Local discovery
+                  Popular near you
                 </div>
-                <p className="mt-2 text-xs leading-6 opacity-75">Use business listings, classifieds, and support lanes without cramped top navigation.</p>
+                <p className="mt-2 text-xs leading-6 opacity-75">Browse verified-style ads and message sellers safely from your dashboard.</p>
               </div>
             </div>
 
             <div className="mt-auto space-y-3 pt-8">
-              {isAuthenticated ? (
-                <NavbarAuthControls />
-              ) : (
+              {!hasHydrated ? (
+                <div className="h-20 w-full animate-pulse rounded-2xl bg-white/10" aria-hidden />
+              ) : isAuthenticated ? (
                 <div className="space-y-3">
-                  <Button variant="ghost" size="sm" asChild className="w-full justify-center rounded-full px-4">
-                    <Link href="/login">Sign In</Link>
-                  </Button>
-                  <Button size="sm" asChild className={cn('w-full justify-center rounded-full', palette.cta)}>
-                    <Link href="/register">
-                      <Plus className="mr-1 h-4 w-4" />
-                      Add Listing
-                    </Link>
+                  <NavbarAuthControls variant="classified" />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-center rounded-full border border-white/15 bg-white/5 px-4 text-white hover:bg-white/10"
+                    onClick={() => logout()}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign out
                   </Button>
                 </div>
+              ) : (
+                <Button variant="ghost" size="sm" asChild className="w-full justify-center rounded-full border border-white/15 bg-white/5 px-4 text-white hover:bg-white/10">
+                  <Link href="/login">Sign in</Link>
+                </Button>
               )}
             </div>
           </div>
@@ -266,7 +279,9 @@ export function Navbar() {
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            {!isAuthenticated ? (
+            {!hasHydrated ? (
+              <div className="h-9 w-28 animate-pulse rounded-full bg-black/10 dark:bg-white/10" aria-hidden />
+            ) : !isAuthenticated ? (
               <Button size="sm" asChild className={cn('rounded-full', style.cta)}>
                 <Link href="/register">
                   <Plus className="mr-1 h-4 w-4" />
@@ -294,6 +309,20 @@ export function Navbar() {
                   </Link>
                 )
               })}
+              {isAuthenticated ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="mt-2 w-full justify-center rounded-2xl"
+                  onClick={() => {
+                    logout()
+                    setIsMobileMenuOpen(false)
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
+                </Button>
+              ) : null}
             </div>
           </div>
         )}
@@ -319,13 +348,6 @@ export function Navbar() {
             <p className="mt-2 text-sm leading-6 opacity-80">Browse by task, lane, or content type without cramped top navigation.</p>
           </div>
 
-          {primaryTask ? (
-            <Link href={primaryTask.route} className={cn('mt-5 inline-flex items-center gap-2 self-start rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em]', isFloating ? 'border border-white/10 bg-white/6 text-white/80' : 'border border-current/10 bg-white/70 opacity-80')}>
-              <Sparkles className="h-3.5 w-3.5" />
-              {primaryTask.label}
-            </Link>
-          ) : null}
-
           <nav className="mt-8 space-y-2">
             {primaryNavigation.map((task) => {
               const Icon = taskIcons[task.key] || LayoutGrid
@@ -348,8 +370,16 @@ export function Navbar() {
           </div>
 
           <div className="mt-auto space-y-3 pt-8">
-            {isAuthenticated ? (
-              <NavbarAuthControls />
+            {!hasHydrated ? (
+              <div className="h-20 w-full animate-pulse rounded-2xl bg-black/5" aria-hidden />
+            ) : isAuthenticated ? (
+              <div className="space-y-3">
+                <NavbarAuthControls />
+                <Button type="button" variant="outline" size="sm" className="w-full justify-center rounded-full" onClick={() => logout()}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
+                </Button>
+              </div>
             ) : (
               <div className="space-y-3">
                 <Button variant="ghost" size="sm" asChild className="w-full justify-center rounded-full px-4">

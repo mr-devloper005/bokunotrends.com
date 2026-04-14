@@ -1,10 +1,20 @@
 import Link from 'next/link'
-import { ArrowRight, Globe, Mail, MapPin, Phone, ShieldCheck, Tag } from 'lucide-react'
+import { Calendar, Facebook, Globe, Instagram, Linkedin, Mail, MapPin, MessageCircle, Phone, Share2, Tag, Twitter } from 'lucide-react'
 import { ContentImage } from '@/components/shared/content-image'
 import { SchemaJsonLd } from '@/components/seo/schema-jsonld'
 import { TaskPostCard } from '@/components/shared/task-post-card'
 import type { SitePost } from '@/lib/site-connector'
 import type { TaskKey } from '@/lib/site-config'
+
+function formatPrice(content: Record<string, unknown>) {
+  const raw = content.price
+  if (typeof raw === 'number') return `$${raw.toLocaleString()}`
+  if (typeof raw === 'string' && raw.trim()) {
+    const t = raw.trim()
+    return t.startsWith('$') ? t : `$${t}`
+  }
+  return null
+}
 
 export function DirectoryTaskDetailPage({
   task,
@@ -33,6 +43,14 @@ export function DirectoryTaskDetailPage({
   const phone = typeof content.phone === 'string' ? content.phone : ''
   const email = typeof content.email === 'string' ? content.email : ''
   const highlights = Array.isArray(content.highlights) ? content.highlights.filter((item): item is string => typeof item === 'string') : []
+  const priceLabel = formatPrice(content)
+  const sellerName = (typeof post.authorName === 'string' && post.authorName.trim()) || 'Seller'
+  const postedAt = post.publishedAt
+    ? new Date(post.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    : null
+  const phoneDigits = phone.replace(/\D/g, '')
+  const whatsappHref = phoneDigits ? `https://wa.me/${phoneDigits}` : '#'
+
   const schemaPayload = {
     '@context': 'https://schema.org',
     '@type': task === 'profile' ? 'Organization' : 'LocalBusiness',
@@ -46,23 +64,56 @@ export function DirectoryTaskDetailPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fbff] text-slate-950">
+    <div className="min-h-screen bg-[#f4faf7] text-[#051B15]">
       <SchemaJsonLd data={schemaPayload} />
-      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <Link href={taskRoute} className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-950">
-          ← Back to {taskLabel}
-        </Link>
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <nav className="mb-6 text-sm text-[#3d5c52]">
+          <Link href="/" className="hover:text-[#00A86B]">Home</Link>
+          <span className="mx-2 opacity-50">/</span>
+          <Link href={taskRoute} className="hover:text-[#00A86B]">{taskLabel}</Link>
+          <span className="mx-2 opacity-50">/</span>
+          <span className="font-medium text-[#051B15] line-clamp-1">{post.title}</span>
+        </nav>
 
-        <section className="grid gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-start">
+        <section className="grid gap-8 lg:grid-cols-[1fr_380px] lg:items-start">
           <div>
-            <div className="overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.08)]">
-              <div className="relative h-[420px] overflow-hidden bg-slate-100">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <h1 className="text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">{post.title}</h1>
+              {priceLabel ? (
+                <div className="shrink-0 text-right">
+                  <p className="text-xs font-medium uppercase tracking-wider text-[#3d5c52]">Price</p>
+                  <p className="text-3xl font-bold tabular-nums text-[#051B15]">{priceLabel}</p>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2 text-sm text-[#3d5c52]">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-900/10 bg-white px-3 py-1.5">
+                <Tag className="h-3.5 w-3.5 text-[#00A86B]" />
+                {category || taskLabel}
+              </span>
+              {postedAt ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-900/10 bg-white px-3 py-1.5">
+                  <Calendar className="h-3.5 w-3.5 text-[#00A86B]" />
+                  Posted {postedAt}
+                </span>
+              ) : null}
+              {location ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-900/10 bg-white px-3 py-1.5">
+                  <MapPin className="h-3.5 w-3.5 text-[#00A86B]" />
+                  {location}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="mt-8 overflow-hidden rounded-2xl border border-emerald-900/10 bg-white shadow-[0_24px_70px_rgba(5,27,21,0.08)]">
+              <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 sm:aspect-[16/9]">
                 <ContentImage src={images[0]} alt={post.title} fill className="object-cover" />
               </div>
               {images.length > 1 ? (
-                <div className="grid grid-cols-4 gap-3 p-4">
-                  {images.slice(1, 5).map((image) => (
-                    <div key={image} className="relative h-24 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                <div className="grid grid-cols-5 gap-2 p-3 sm:p-4">
+                  {images.slice(0, 5).map((image) => (
+                    <div key={image} className="relative aspect-square overflow-hidden rounded-xl border border-emerald-900/10 bg-slate-50">
                       <ContentImage src={image} alt={post.title} fill className="object-cover" />
                     </div>
                   ))}
@@ -70,80 +121,136 @@ export function DirectoryTaskDetailPage({
               ) : null}
             </div>
 
-            <div className="mt-8 rounded-[2rem] border border-slate-200 bg-white p-7 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">About this {task}</p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">Structured details instead of a generic content block.</h2>
-              <p className="mt-4 text-sm leading-8 text-slate-600">{description}</p>
+            <div className="mt-8 rounded-2xl border border-emerald-900/10 bg-white p-6 shadow-sm sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3d5c52]">Description</p>
+              <p className="mt-4 text-sm leading-8 text-[#1a3d34]">{description}</p>
               {highlights.length ? (
-                <div className="mt-6 grid gap-3 md:grid-cols-2">
-                  {highlights.slice(0, 4).map((item) => (
-                    <div key={item} className="rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-700">
+                <ul className="mt-6 grid gap-2 sm:grid-cols-2">
+                  {highlights.slice(0, 6).map((item) => (
+                    <li key={item} className="rounded-xl border border-emerald-900/10 bg-[#ecf6f1] px-4 py-3 text-sm text-[#051B15]">
                       {item}
-                    </div>
+                    </li>
                   ))}
-                </div>
+                </ul>
               ) : null}
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div className="rounded-[2rem] border border-slate-200 bg-white p-7 shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">{category || taskLabel}</p>
-                  <h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em]">{post.title}</h1>
-                </div>
-                <span className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white">
-                  <ShieldCheck className="h-3.5 w-3.5" /> Verified
-                </span>
-              </div>
-
-              <div className="mt-6 grid gap-3">
-                {location ? <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"><MapPin className="h-4 w-4" /> {location}</div> : null}
-                {phone ? <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"><Phone className="h-4 w-4" /> {phone}</div> : null}
-                {email ? <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"><Mail className="h-4 w-4" /> {email}</div> : null}
-                {website ? <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"><Globe className="h-4 w-4" /> {website}</div> : null}
-              </div>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                {website ? <a href={website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800">Visit website <ArrowRight className="h-4 w-4" /></a> : null}
-                <Link href={taskRoute} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-950 hover:bg-slate-100">Browse more</Link>
-              </div>
             </div>
 
             {mapEmbedUrl ? (
-              <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
-                <div className="border-b border-slate-200 px-6 py-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Location</p>
+              <div className="mt-8 overflow-hidden rounded-2xl border border-emerald-900/10 bg-white shadow-sm">
+                <div className="border-b border-emerald-900/10 px-5 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3d5c52]">Location</p>
                 </div>
-                <iframe src={mapEmbedUrl} title={`${post.title} map`} className="h-[320px] w-full border-0" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+                <iframe src={mapEmbedUrl} title={`${post.title} map`} className="h-[280px] w-full border-0 sm:h-[320px]" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+              </div>
+            ) : null}
+          </div>
+
+          <aside className="space-y-6">
+            <div className="rounded-2xl border border-emerald-900/10 bg-white p-6 shadow-[0_20px_50px_rgba(5,27,21,0.07)]">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#00A86B]">Active member</span>
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#3d5c52]">
+                  <span className="h-2 w-2 rounded-full bg-[#00A86B]" />
+                  Online
+                </span>
+              </div>
+              <div className="mt-5 flex items-center gap-3">
+                <div className="relative h-14 w-14 overflow-hidden rounded-full border border-emerald-900/10 bg-[#ecf6f1]">
+                  <ContentImage src={images[0]} alt={sellerName} fill className="object-cover" />
+                </div>
+                <div>
+                  <p className="font-semibold text-[#051B15]">{sellerName}</p>
+                  <Link href={taskRoute} className="text-sm font-medium text-[#00A86B] hover:underline">
+                    View all ads
+                  </Link>
+                </div>
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <a
+                  href={email ? `mailto:${email}` : '#'}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#051B15] px-4 py-3 text-sm font-semibold text-white hover:bg-[#0a2e24]"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Message
+                </a>
+                <a
+                  href={phoneDigits ? whatsappHref : undefined}
+                  aria-disabled={!phoneDigits}
+                  className={`inline-flex items-center justify-center gap-2 rounded-xl border-2 border-[#00A86B] bg-white px-4 py-3 text-sm font-semibold text-[#00A86B] hover:bg-[#ecf6f1] ${!phoneDigits ? 'pointer-events-none opacity-45' : ''}`}
+                  {...(phoneDigits ? { target: '_blank', rel: 'noreferrer' } : {})}
+                >
+                  WhatsApp
+                </a>
+              </div>
+              <div className="mt-5 flex justify-center gap-2">
+                {[Facebook, Instagram, Twitter, Linkedin, Share2].map((Icon, i) => (
+                  <span key={i} className="flex h-9 w-9 items-center justify-center rounded-full bg-[#ecf6f1] text-[#051B15]">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                ))}
+              </div>
+              <div className="mt-5 space-y-2 border-t border-emerald-900/10 pt-5 text-sm text-[#3d5c52]">
+                {phone ? (
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 shrink-0 text-[#00A86B]" />
+                    {phone}
+                  </div>
+                ) : null}
+                {email ? (
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 shrink-0 text-[#00A86B]" />
+                    {email}
+                  </div>
+                ) : null}
+                {website ? (
+                  <a href={website} target="_blank" rel="noreferrer" className="flex items-center gap-2 font-medium text-[#00A86B] hover:underline">
+                    <Globe className="h-4 w-4 shrink-0" />
+                    Website
+                  </a>
+                ) : null}
+              </div>
+            </div>
+
+            {related.length ? (
+              <div>
+                <p className="text-sm font-semibold text-[#051B15]">More from this seller</p>
+                <ul className="mt-4 space-y-3">
+                  {related.slice(0, 4).map((item) => (
+                    <li key={item.id}>
+                      <Link href={`${taskRoute}/${item.slug}`} className="group flex gap-3 rounded-xl border border-emerald-900/10 bg-[#f8fcfa] p-3 transition hover:border-[#00A86B]/40">
+                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                          <ContentImage src={typeof item.media?.[0]?.url === 'string' ? item.media[0].url : images[0]} alt={item.title} fill className="object-cover" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="line-clamp-2 text-sm font-semibold text-[#051B15] group-hover:text-[#00A86B]">{item.title}</p>
+                          <p className="text-xs text-[#3d5c52]">View ad</p>
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ) : null}
 
-            <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Quick trust cues</p>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {['Clear contact details', 'Stronger business framing', 'Map and location cues', 'Related surfaces nearby'].map((item) => (
-                  <div key={item} className="rounded-[1.3rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-700">{item}</div>
-                ))}
-              </div>
+            <div className="rounded-2xl border border-dashed border-emerald-900/20 bg-[#ecf6f1]/50 p-5 text-center text-sm text-[#3d5c52]">
+              Featured placement — boost your ad to the top of search.
             </div>
-          </div>
+          </aside>
         </section>
 
-        {related.length ? (
+        {related.length > 4 ? (
           <section className="mt-14">
-            <div className="flex items-end justify-between gap-4 border-b border-slate-200 pb-6">
+            <div className="flex items-end justify-between gap-4 border-b border-emerald-900/10 pb-5">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Related surfaces</p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">Keep browsing nearby matches.</h2>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3d5c52]">You may also like</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">Similar listings</h2>
               </div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">
-                <Tag className="h-3.5 w-3.5" /> {taskLabel}
-              </span>
+              <Link href={taskRoute} className="text-sm font-semibold text-[#00A86B] hover:underline">
+                View all
+              </Link>
             </div>
-            <div className="mt-8 grid gap-6 lg:grid-cols-3">
-              {related.map((item) => (
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {related.slice(4, 10).map((item) => (
                 <TaskPostCard key={item.id} post={item} href={`${taskRoute}/${item.slug}`} taskKey={task} />
               ))}
             </div>
