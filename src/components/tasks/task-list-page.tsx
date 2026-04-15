@@ -1,8 +1,10 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { ArrowRight, Building2, FileText, Image as ImageIcon, LayoutGrid, Tag, User } from 'lucide-react'
 import { NavbarShell } from '@/components/shared/navbar-shell'
 import { Footer } from '@/components/shared/footer'
 import { TaskListClient } from '@/components/tasks/task-list-client'
+import { ClassifiedsBrowseClient } from '@/components/classifieds/classifieds-browse-client'
 import { SchemaJsonLd } from '@/components/seo/schema-jsonld'
 import { fetchTaskPosts } from '@/lib/task-data'
 import { SITE_CONFIG, getTaskConfig, type TaskKey } from '@/lib/site-config'
@@ -34,14 +36,22 @@ const variantShells = {
   'profile-creator': 'bg-[linear-gradient(180deg,#0a1120_0%,#101c34_100%)] text-white',
   'profile-business': 'bg-[linear-gradient(180deg,#f6fbff_0%,#ffffff_100%)]',
   'classified-bulletin': 'bg-[linear-gradient(180deg,#edf3e4_0%,#ffffff_100%)]',
-  'classified-market': 'bg-[linear-gradient(180deg,#f4f6ef_0%,#ffffff_100%)]',
+  'classified-market': 'bg-[linear-gradient(180deg,#ecf6f1_0%,#ffffff_55%,#f4faf7_100%)] text-[#051B15]',
   'sbm-curation': 'bg-[linear-gradient(180deg,#fff7ee_0%,#ffffff_100%)]',
   'sbm-library': 'bg-[linear-gradient(180deg,#f7f8fc_0%,#ffffff_100%)]',
 } as const
 
-export async function TaskListPage({ task, category }: { task: TaskKey; category?: string }) {
+export async function TaskListPage({
+  task,
+  category,
+  location,
+}: {
+  task: TaskKey
+  category?: string
+  location?: string
+}) {
   if (TASK_LIST_PAGE_OVERRIDE_ENABLED) {
-    return await TaskListPageOverride({ task, category })
+    return await TaskListPageOverride({ task, category, location })
   }
 
   const taskConfig = getTaskConfig(task)
@@ -77,13 +87,21 @@ export async function TaskListPage({ task, category }: { task: TaskKey; category
           input: 'border border-[#dbc6b6] bg-white text-[#2f1d16]',
           button: 'bg-[#2f1d16] text-[#fff4e4] hover:bg-[#452920]',
         }
-      : {
-          muted: 'text-slate-600',
-          panel: 'border border-slate-200 bg-white',
-          soft: 'border border-slate-200 bg-slate-50',
-          input: 'border border-slate-200 bg-white text-slate-950',
-          button: 'bg-slate-950 text-white hover:bg-slate-800',
-        }
+      : layoutKey.startsWith('classified')
+        ? {
+            muted: 'text-[#3d5c52]',
+            panel: 'border border-emerald-900/10 bg-white shadow-[0_20px_50px_rgba(5,27,21,0.06)]',
+            soft: 'border border-emerald-900/10 bg-[#ecf6f1]',
+            input: 'border border-emerald-900/12 bg-[#f8fcfa] text-[#051B15]',
+            button: 'bg-[#00A86B] text-white hover:bg-[#009060]',
+          }
+        : {
+            muted: 'text-slate-600',
+            panel: 'border border-slate-200 bg-white',
+            soft: 'border border-slate-200 bg-slate-50',
+            input: 'border border-slate-200 bg-white text-slate-950',
+            button: 'bg-slate-950 text-white hover:bg-slate-800',
+          }
 
   return (
     <div className={`min-h-screen ${shellClass}`}>
@@ -200,17 +218,26 @@ export async function TaskListPage({ task, category }: { task: TaskKey; category
         ) : null}
 
         {layoutKey === 'classified-bulletin' || layoutKey === 'classified-market' ? (
-          <section className="mb-12 grid gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-            <div className={`rounded-[1.8rem] p-6 ${ui.panel}`}>
-              <p className={`text-xs uppercase tracking-[0.3em] ${ui.muted}`}>{taskConfig?.label || task}</p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-foreground">Fast-moving notices, offers, and responses in a compact board format.</h1>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {['Quick to scan', 'Shorter response path', 'Clearer urgency cues'].map((item) => (
-                <div key={item} className={`rounded-[1.5rem] p-5 ${ui.soft}`}>
-                  <p className="text-sm font-semibold">{item}</p>
-                </div>
-              ))}
+          <section className="relative mb-10 overflow-hidden rounded-[2rem] bg-[#051B15] px-6 py-10 text-white shadow-[0_28px_80px_rgba(5,27,21,0.25)] sm:px-10">
+            <div
+              className="pointer-events-none absolute inset-0 opacity-25"
+              style={{
+                backgroundImage: 'url(https://images.unsplash.com/photo-1449844908441-8829872d2607?w=1400&q=60&auto=format&fit=crop)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#051B15] via-[#051B15]/90 to-[#0a3d2e]/80" />
+            <div className="relative">
+              <nav className="text-xs font-medium text-emerald-100/90">
+                <Link href="/" className="hover:text-white">Home</Link>
+                <span className="mx-2 opacity-60">/</span>
+                <span className="text-white">{taskConfig?.label || 'Ads'}</span>
+              </nav>
+              <h1 className="mt-4 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Browse ads</h1>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-emerald-50/85">
+                Filter by category, scan featured listings, and jump straight to what you want to buy or sell.
+              </p>
             </div>
           </section>
         ) : null}
@@ -251,7 +278,25 @@ export async function TaskListPage({ task, category }: { task: TaskKey; category
           </section>
         ) : null}
 
-        <TaskListClient task={task} initialPosts={posts} category={normalizedCategory} />
+        {task === 'classified' ? (
+          <Suspense
+            fallback={
+              <div className="rounded-2xl border border-emerald-900/10 bg-white/80 p-10 text-center text-sm text-[#3d5c52]">
+                Loading classifieds…
+              </div>
+            }
+          >
+            <ClassifiedsBrowseClient
+              initialPosts={posts}
+              normalizedCategory={normalizedCategory}
+              taskRoute={taskConfig?.route || '/classifieds'}
+              initialLocation={location}
+              ui={ui}
+            />
+          </Suspense>
+        ) : (
+          <TaskListClient task={task} initialPosts={posts} category={normalizedCategory} />
+        )}
       </main>
       <Footer />
     </div>

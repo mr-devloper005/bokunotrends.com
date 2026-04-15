@@ -62,18 +62,26 @@ export function Footer() {
 
   if (recipe.footer === 'minimal-footer') {
     return (
-      <footer className="border-t border-[#d7deca] bg-[#f4f6ef] text-[#1f2617]">
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-8 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <div>
-            <p className="text-lg font-semibold">{SITE_CONFIG.name}</p>
-            <p className="mt-1 text-sm text-[#56604b]">{SITE_CONFIG.description}</p>
+      <footer className="border-t border-emerald-900/15 bg-[linear-gradient(180deg,#f4faf7_0%,#e8f2ec_100%)] text-[#051B15]">
+        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-10 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-emerald-900/10 bg-white p-1">
+              <img src="/favicon.png?v=20260401" alt={`${SITE_CONFIG.name} logo`} width="40" height="40" className="h-full w-full object-contain" />
+            </div>
+            <div>
+              <p className="text-lg font-semibold">{SITE_CONFIG.name}</p>
+              <p className="mt-1 max-w-md text-sm text-[#1a3d34]">{SITE_CONFIG.description}</p>
+            </div>
           </div>
           <div className="flex flex-wrap gap-3">
             {enabledTasks.slice(0, 5).map((task) => (
-              <Link key={task.key} href={task.route} className="rounded-lg border border-[#d7deca] bg-white px-3 py-2 text-sm font-medium text-[#1f2617] hover:bg-[#ebefdf]">
+              <Link key={task.key} href={task.route} className="rounded-full border border-emerald-900/12 bg-white px-4 py-2 text-sm font-medium text-[#051B15] shadow-sm hover:border-[#00A86B]/40 hover:text-[#00A86B]">
                 {task.label}
               </Link>
             ))}
+            <Link href="/create/classified" className="rounded-full bg-[#00A86B] px-4 py-2 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(0,168,107,0.25)] hover:bg-[#009060]">
+              + Post Ad
+            </Link>
           </div>
         </div>
       </footer>
