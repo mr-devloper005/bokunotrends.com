@@ -9,6 +9,8 @@ interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
+  /** True after client has read localStorage (avoids auth UI flash on refresh). */
+  hasHydrated: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => void
   signup: (name: string, email: string, password: string) => Promise<void>
@@ -20,12 +22,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [hasHydrated, setHasHydrated] = useState(false)
 
   useEffect(() => {
     const storedUser = loadFromStorage<User | null>(storageKeys.user, null)
     if (storedUser) {
       setUser(storedUser)
     }
+    setHasHydrated(true)
   }, [])
 
   const buildUser = useCallback((overrides: Partial<User>) => {
@@ -103,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         isAuthenticated: !!user,
         isLoading,
+        hasHydrated,
         login,
         logout,
         signup,

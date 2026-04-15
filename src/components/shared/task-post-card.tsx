@@ -117,11 +117,11 @@ export function TaskPostCard({
   if (isDirectorySurface) {
     const cardTone = recipe.brandPack === 'market-utility'
       ? {
-          frame: 'rounded-[1.75rem] border border-[#d7deca] bg-white shadow-[0_18px_44px_rgba(64,76,34,0.08)] hover:-translate-y-1 hover:shadow-[0_22px_50px_rgba(64,76,34,0.14)]',
-          badge: 'bg-[#1f2617] text-[#edf5dc]',
-          muted: 'text-[#5b664c]',
-          title: 'text-[#1f2617]',
-          cta: 'text-[#1f2617]',
+          frame: 'rounded-[1.75rem] border border-emerald-900/10 bg-white shadow-[0_18px_44px_rgba(5,27,21,0.07)] hover:-translate-y-1 hover:shadow-[0_22px_50px_rgba(5,27,21,0.12)]',
+          badge: 'bg-[#051B15] text-white',
+          muted: 'text-[#3d5c52]',
+          title: 'text-[#051B15]',
+          cta: 'text-[#00A86B]',
         }
       : {
           frame: 'rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_18px_44px_rgba(15,23,42,0.08)] hover:-translate-y-1 hover:shadow-[0_22px_50px_rgba(15,23,42,0.14)]',
@@ -131,31 +131,45 @@ export function TaskPostCard({
           cta: 'text-slate-950',
         }
 
+    const rawPrice = (content as Record<string, unknown>).price
+    const priceLabel =
+      typeof rawPrice === 'number'
+        ? `$${rawPrice.toLocaleString()}`
+        : typeof rawPrice === 'string' && rawPrice.trim()
+          ? rawPrice.trim().startsWith('$')
+            ? rawPrice.trim()
+            : `$${rawPrice.trim()}`
+          : null
+
     return (
       <Link href={href} className={`group flex h-full flex-col overflow-hidden transition duration-300 ${cardTone.frame}`}>
         <div className="relative aspect-[16/11] overflow-hidden bg-slate-100">
           <ContentImage src={image} alt={altText} fill sizes={imageSizes} quality={75} className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" intrinsicWidth={960} intrinsicHeight={720} />
-          <div className="absolute inset-x-0 top-0 flex items-center justify-between p-4">
+          <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-4">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#00A86B] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white shadow-sm">
+              Featured
+            </span>
             <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${cardTone.badge}`}>
               <Tag className="h-3.5 w-3.5" />
               {category}
             </span>
-            <span className="rounded-full bg-white/85 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-900">
-              {variant === 'classified' ? 'Open now' : 'Verified'}
-            </span>
           </div>
         </div>
         <div className="flex flex-1 flex-col p-5">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-start justify-between gap-3">
             <h3 className={`line-clamp-2 text-xl font-semibold leading-snug ${cardTone.title}`}>{post.title}</h3>
-            <ArrowUpRight className={`h-5 w-5 shrink-0 ${cardTone.muted}`} />
+            {priceLabel ? (
+              <span className="shrink-0 text-lg font-bold tabular-nums text-[#051B15]">{priceLabel}</span>
+            ) : (
+              <ArrowUpRight className={`h-5 w-5 shrink-0 ${cardTone.muted}`} />
+            )}
           </div>
           <p className={`mt-3 line-clamp-3 text-sm leading-7 ${cardTone.muted}`}>{getExcerpt(content.description || post.summary) || 'Explore this local listing.'}</p>
           <div className="mt-5 flex flex-wrap gap-3 text-xs">
             {content.location ? <span className={`inline-flex items-center gap-1 ${cardTone.muted}`}><MapPin className="h-3.5 w-3.5" />{content.location}</span> : null}
             {content.email ? <span className={`inline-flex items-center gap-1 ${cardTone.muted}`}><Mail className="h-3.5 w-3.5" />{content.email}</span> : null}
           </div>
-          <div className={`mt-auto pt-5 text-sm font-semibold ${cardTone.cta}`}>{variant === 'classified' ? 'View offer' : 'View details'}</div>
+          <div className={`mt-auto pt-5 text-sm font-semibold ${cardTone.cta}`}>{variant === 'classified' ? 'Contact seller' : 'View details'}</div>
         </div>
       </Link>
     )
