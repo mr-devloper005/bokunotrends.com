@@ -39,7 +39,7 @@ const getContent = (post: any): PostContent => {
 };
 
 const getImageUrls = (post: any, content: PostContent) => {
-  const media = Array.isArray(post.media) ? post.media : [];
+  const media = (Array.isArray(post.media) ? post.media : []) as Array<{ url?: string | null }>;
   const mediaImages = media
     .map((item) => item?.url)
     .filter((url): url is string => isValidImageUrl(url));

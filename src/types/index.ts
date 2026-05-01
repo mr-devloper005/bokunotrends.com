@@ -57,6 +57,7 @@ export interface Listing {
   hours?: BusinessHours[]
   owner: User
   createdAt: string
+  views?: number
   isFeatured: boolean
   isVerified: boolean
   status: 'active' | 'pending' | 'closed'
