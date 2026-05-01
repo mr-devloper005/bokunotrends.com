@@ -9,11 +9,11 @@ import { CONTACT_PAGE_OVERRIDE_ENABLED, ContactPageOverride } from '@/overrides/
 function getTone(kind: ReturnType<typeof getProductKind>) {
   if (kind === 'directory') {
     return {
-      shell: 'bg-[#f8fbff] text-slate-950',
-      panel: 'border border-slate-200 bg-white',
-      soft: 'border border-slate-200 bg-slate-50',
-      muted: 'text-slate-600',
-      action: 'bg-slate-950 text-white hover:bg-slate-800',
+      shell: 'bg-[#f4faf7] text-[#051B15]',
+      panel: 'border border-emerald-900/10 bg-white shadow-[0_24px_64px_rgba(5,27,21,0.08)]',
+      soft: 'border border-emerald-900/10 bg-[#ecf6f1]',
+      muted: 'text-[#3d5c52]',
+      action: 'bg-[#00A86B] text-white hover:bg-[#009060]',
     }
   }
   if (kind === 'editorial') {
@@ -51,6 +51,7 @@ export default function ContactPage() {
   const { recipe } = getFactoryState()
   const productKind = getProductKind(recipe)
   const tone = getTone(productKind)
+  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() || "support@example.com"
   const lanes =
     productKind === 'directory'
       ? [
@@ -98,6 +99,12 @@ export default function ContactPage() {
 
           <div className={`rounded-[2rem] p-7 ${tone.panel}`}>
             <h2 className="text-2xl font-semibold">Send a message</h2>
+            <a
+              href={`mailto:${contactEmail}`}
+              className={`mt-4 inline-flex h-11 items-center justify-center rounded-full px-5 text-sm font-semibold ${tone.action}`}
+            >
+              Email us at {contactEmail}
+            </a>
             <form className="mt-6 grid gap-4">
               <input className="h-12 rounded-xl border border-current/10 bg-transparent px-4 text-sm" placeholder="Your name" />
               <input className="h-12 rounded-xl border border-current/10 bg-transparent px-4 text-sm" placeholder="Email address" />

@@ -30,6 +30,7 @@ const footerLinks = {
     { name: 'Careers', href: '/careers' },
     { name: 'Blog', href: '/blog' },
     { name: 'Press', href: '/press' },
+    { name: 'Contact Us', href: '/contact' },
   ],
   resources: [
     { name: 'Help Center', href: '/help' },
@@ -79,6 +80,9 @@ export function Footer() {
                 {task.label}
               </Link>
             ))}
+            <Link href="/contact" className="rounded-full border border-emerald-900/12 bg-white px-4 py-2 text-sm font-semibold text-[#051B15] shadow-sm hover:border-[#00A86B]/40 hover:text-[#00A86B]">
+              Contact Us
+            </Link>
             <Link href="/create/classified" className="rounded-full bg-[#00A86B] px-4 py-2 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(0,168,107,0.25)] hover:bg-[#009060]">
               + Post Ad
             </Link>

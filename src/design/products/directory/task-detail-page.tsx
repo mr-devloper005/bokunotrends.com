@@ -1,8 +1,12 @@
+ 'use client'
+
 import Link from 'next/link'
-import { Calendar, Facebook, Globe, Instagram, Linkedin, Mail, MapPin, MessageCircle, Phone, Share2, Tag, Twitter } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Calendar, Globe, Mail, MapPin, Phone, Tag } from 'lucide-react'
 import { ContentImage } from '@/components/shared/content-image'
 import { SchemaJsonLd } from '@/components/seo/schema-jsonld'
 import { TaskPostCard } from '@/components/shared/task-post-card'
+import { RichContent, formatRichHtml } from '@/components/shared/rich-content'
 import type { SitePost } from '@/lib/site-connector'
 import type { TaskKey } from '@/lib/site-config'
 
@@ -37,6 +41,7 @@ export function DirectoryTaskDetailPage({
   mapEmbedUrl: string | null
   related: SitePost[]
 }) {
+  const [activeImage, setActiveImage] = useState<string | null>(null)
   const content = post.content && typeof post.content === 'object' ? (post.content as Record<string, unknown>) : {}
   const location = typeof content.address === 'string' ? content.address : typeof content.location === 'string' ? content.location : ''
   const website = typeof content.website === 'string' ? content.website : ''
@@ -48,8 +53,16 @@ export function DirectoryTaskDetailPage({
   const postedAt = post.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
     : null
-  const phoneDigits = phone.replace(/\D/g, '')
-  const whatsappHref = phoneDigits ? `https://wa.me/${phoneDigits}` : '#'
+  const descriptionHtml = formatRichHtml(description, 'Details coming soon.')
+
+  useEffect(() => {
+    if (!activeImage) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setActiveImage(null)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [activeImage])
 
   const schemaPayload = {
     '@context': 'https://schema.org',
@@ -108,14 +121,27 @@ export function DirectoryTaskDetailPage({
 
             <div className="mt-8 overflow-hidden rounded-2xl border border-emerald-900/10 bg-white shadow-[0_24px_70px_rgba(5,27,21,0.08)]">
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 sm:aspect-[16/9]">
-                <ContentImage src={images[0]} alt={post.title} fill className="object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setActiveImage(images[0])}
+                  className="h-full w-full cursor-zoom-in"
+                  aria-label="Open main photo"
+                >
+                  <ContentImage src={images[0]} alt={post.title} fill className="object-cover" />
+                </button>
               </div>
               {images.length > 1 ? (
                 <div className="grid grid-cols-5 gap-2 p-3 sm:p-4">
                   {images.slice(0, 5).map((image) => (
-                    <div key={image} className="relative aspect-square overflow-hidden rounded-xl border border-emerald-900/10 bg-slate-50">
+                    <button
+                      key={image}
+                      type="button"
+                      onClick={() => setActiveImage(image)}
+                      className="relative aspect-square overflow-hidden rounded-xl border border-emerald-900/10 bg-slate-50 cursor-zoom-in"
+                      aria-label="Open photo"
+                    >
                       <ContentImage src={image} alt={post.title} fill className="object-cover" />
-                    </div>
+                    </button>
                   ))}
                 </div>
               ) : null}
@@ -123,7 +149,7 @@ export function DirectoryTaskDetailPage({
 
             <div className="mt-8 rounded-2xl border border-emerald-900/10 bg-white p-6 shadow-sm sm:p-8">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3d5c52]">Description</p>
-              <p className="mt-4 text-sm leading-8 text-[#1a3d34]">{description}</p>
+              <RichContent html={descriptionHtml} className="mt-4 text-sm leading-8 text-[#1a3d34]" />
               {highlights.length ? (
                 <ul className="mt-6 grid gap-2 sm:grid-cols-2">
                   {highlights.slice(0, 6).map((item) => (
@@ -145,54 +171,26 @@ export function DirectoryTaskDetailPage({
             ) : null}
           </div>
 
-          <aside className="space-y-6">
-            <div className="rounded-2xl border border-emerald-900/10 bg-white p-6 shadow-[0_20px_50px_rgba(5,27,21,0.07)]">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#00A86B]">Active member</span>
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#3d5c52]">
-                  <span className="h-2 w-2 rounded-full bg-[#00A86B]" />
-                  Online
-                </span>
-              </div>
-              <div className="mt-5 flex items-center gap-3">
-                <div className="relative h-14 w-14 overflow-hidden rounded-full border border-emerald-900/10 bg-[#ecf6f1]">
-                  <ContentImage src={images[0]} alt={sellerName} fill className="object-cover" />
-                </div>
+	          <aside className="space-y-6">
+	            <div className="rounded-2xl border border-emerald-900/10 bg-white p-6 shadow-[0_20px_50px_rgba(5,27,21,0.07)]">
+	              <div className="flex items-center justify-between gap-2">
+	                <span className="text-xs font-semibold uppercase tracking-wider text-[#00A86B]">Active member</span>
+	              </div>
+	              <div className="mt-5 flex items-center gap-3">
+	                <div className="relative h-14 w-14 overflow-hidden rounded-full border border-emerald-900/10 bg-[#ecf6f1]">
+	                  <ContentImage src={images[0]} alt={sellerName} fill className="object-cover" />
+	                </div>
                 <div>
                   <p className="font-semibold text-[#051B15]">{sellerName}</p>
                   <Link href={taskRoute} className="text-sm font-medium text-[#00A86B] hover:underline">
                     View all ads
-                  </Link>
-                </div>
-              </div>
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <a
-                  href={email ? `mailto:${email}` : '#'}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#051B15] px-4 py-3 text-sm font-semibold text-white hover:bg-[#0a2e24]"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  Message
-                </a>
-                <a
-                  href={phoneDigits ? whatsappHref : undefined}
-                  aria-disabled={!phoneDigits}
-                  className={`inline-flex items-center justify-center gap-2 rounded-xl border-2 border-[#00A86B] bg-white px-4 py-3 text-sm font-semibold text-[#00A86B] hover:bg-[#ecf6f1] ${!phoneDigits ? 'pointer-events-none opacity-45' : ''}`}
-                  {...(phoneDigits ? { target: '_blank', rel: 'noreferrer' } : {})}
-                >
-                  WhatsApp
-                </a>
-              </div>
-              <div className="mt-5 flex justify-center gap-2">
-                {[Facebook, Instagram, Twitter, Linkedin, Share2].map((Icon, i) => (
-                  <span key={i} className="flex h-9 w-9 items-center justify-center rounded-full bg-[#ecf6f1] text-[#051B15]">
-                    <Icon className="h-4 w-4" />
-                  </span>
-                ))}
-              </div>
-              <div className="mt-5 space-y-2 border-t border-emerald-900/10 pt-5 text-sm text-[#3d5c52]">
-                {phone ? (
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 shrink-0 text-[#00A86B]" />
+	                  </Link>
+	                </div>
+	              </div>
+	              <div className="mt-5 space-y-2 border-t border-emerald-900/10 pt-5 text-sm text-[#3d5c52]">
+	                {phone ? (
+	                  <div className="flex items-center gap-2">
+	                    <Phone className="h-4 w-4 shrink-0 text-[#00A86B]" />
                     {phone}
                   </div>
                 ) : null}
@@ -257,6 +255,29 @@ export function DirectoryTaskDetailPage({
           </section>
         ) : null}
       </main>
+      {activeImage ? (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image preview"
+          onClick={() => setActiveImage(null)}
+        >
+          <div className="relative w-full max-w-5xl" onClick={(event) => event.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setActiveImage(null)}
+              className="absolute right-3 top-3 z-10 rounded-full bg-white/95 px-3 py-1 text-lg font-semibold leading-none text-[#051B15] shadow-sm hover:bg-white"
+              aria-label="Close preview"
+            >
+              ×
+            </button>
+            <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-black">
+              <ContentImage src={activeImage} alt={`${post.title} preview`} fill className="object-contain" />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

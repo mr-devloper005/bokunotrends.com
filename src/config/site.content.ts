@@ -146,11 +146,7 @@ export const taskIntroCopy: Record<
       'They work well alongside articles, listings, and profiles, making it easier to connect short-term posts with more structured content.',
       'Browse by category to find announcements quickly, then continue into related sections when you need more detail.',
     ],
-    links: [
-      { label: 'Business listings', href: '/listings' },
-      { label: 'Read articles', href: '/articles' },
-      { label: 'View profiles', href: '/profile' },
-    ],
+    links: [],
   },
   image: {
     title: 'Image-led posts and visual stories',
