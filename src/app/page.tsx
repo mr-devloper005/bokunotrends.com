@@ -274,7 +274,6 @@ function DirectoryHome({ primaryTask, enabledTasks, listingPosts, classifiedPost
           {categoryChips.slice(0, 6).map((cat, index) => {
             const post = classifiedPosts[index] || featuredListings[index]
             const img = post ? getPostImage(post) : '/placeholder.jpg'
-            const adsCount = 20 + index * 17
             return (
               <Link
                 key={cat.slug}
@@ -286,7 +285,6 @@ function DirectoryHome({ primaryTask, enabledTasks, listingPosts, classifiedPost
                   <div className="absolute inset-0 bg-gradient-to-t from-[#051B15]/90 via-[#051B15]/20 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-4 text-white">
                     <p className="text-lg font-semibold">{cat.name}</p>
-                    <p className="text-sm text-emerald-100/90">{adsCount}+ ads</p>
                   </div>
                 </div>
               </Link>
