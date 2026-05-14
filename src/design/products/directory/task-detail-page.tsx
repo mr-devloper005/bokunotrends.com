@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { Calendar, Globe, Mail, MapPin, Phone, Tag } from 'lucide-react'
+import { Globe, Mail, MapPin, Phone, Tag } from 'lucide-react'
 import { ContentImage } from '@/components/shared/content-image'
 import { SchemaJsonLd } from '@/components/seo/schema-jsonld'
 import { TaskPostCard } from '@/components/shared/task-post-card'
@@ -12,9 +12,11 @@ import type { TaskKey } from '@/lib/site-config'
 
 function formatPrice(content: Record<string, unknown>) {
   const raw = content.price
-  if (typeof raw === 'number') return `$${raw.toLocaleString()}`
+  if (typeof raw === 'number') return raw > 0 ? `$${raw.toLocaleString()}` : null
   if (typeof raw === 'string' && raw.trim()) {
     const t = raw.trim()
+    const numeric = Number(t.replace(/[^0-9.]/g, ''))
+    if (Number.isFinite(numeric) && numeric <= 0) return null
     return t.startsWith('$') ? t : `$${t}`
   }
   return null
@@ -50,9 +52,6 @@ export function DirectoryTaskDetailPage({
   const highlights = Array.isArray(content.highlights) ? content.highlights.filter((item): item is string => typeof item === 'string') : []
   const priceLabel = formatPrice(content)
   const sellerName = (typeof post.authorName === 'string' && post.authorName.trim()) || 'Seller'
-  const postedAt = post.publishedAt
-    ? new Date(post.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-    : null
   const descriptionHtml = formatRichHtml(description, 'Details coming soon.')
 
   useEffect(() => {
@@ -105,12 +104,6 @@ export function DirectoryTaskDetailPage({
                 <Tag className="h-3.5 w-3.5 text-[#00A86B]" />
                 {category || taskLabel}
               </span>
-              {postedAt ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-900/10 bg-white px-3 py-1.5">
-                  <Calendar className="h-3.5 w-3.5 text-[#00A86B]" />
-                  Posted {postedAt}
-                </span>
-              ) : null}
               {location ? (
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-900/10 bg-white px-3 py-1.5">
                   <MapPin className="h-3.5 w-3.5 text-[#00A86B]" />
