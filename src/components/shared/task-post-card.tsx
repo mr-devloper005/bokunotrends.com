@@ -134,11 +134,16 @@ export function TaskPostCard({
     const rawPrice = (content as Record<string, unknown>).price
     const priceLabel =
       typeof rawPrice === 'number'
-        ? `$${rawPrice.toLocaleString()}`
+        ? rawPrice > 0
+          ? `$${rawPrice.toLocaleString()}`
+          : null
         : typeof rawPrice === 'string' && rawPrice.trim()
-          ? rawPrice.trim().startsWith('$')
-            ? rawPrice.trim()
-            : `$${rawPrice.trim()}`
+          ? (() => {
+              const trimmed = rawPrice.trim()
+              const numeric = Number(trimmed.replace(/[^0-9.]/g, ''))
+              if (Number.isFinite(numeric) && numeric <= 0) return null
+              return trimmed.startsWith('$') ? trimmed : `$${trimmed}`
+            })()
           : null
 
     return (

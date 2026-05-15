@@ -13,7 +13,7 @@ import { CLASSIFIED_REGIONS } from '@/lib/classifieds-regions'
 import { cn } from '@/lib/utils'
 import type { SitePost } from '@/lib/site-connector'
 import type { TaskKey } from '@/lib/site-config'
-import { Filter, MapPin, Search } from 'lucide-react'
+import { MapPin, Search } from 'lucide-react'
 
 const CONDITIONS = [
   { value: '', label: 'Any condition' },
@@ -151,7 +151,7 @@ function ClassifiedListRow({ post, href }: { post: SitePost; href: string }) {
   const c = getContentRecord(post)
   const loc = getPostLocationText(post)
   const price = getNumericPrice(post)
-  const priceLabel = price != null ? `$${price.toLocaleString()}` : null
+  const priceLabel = price != null && price > 0 ? `$${price.toLocaleString()}` : null
   const cat = typeof c.category === 'string' ? c.category : 'Ad'
 
   return (
@@ -329,9 +329,6 @@ export function ClassifiedsBrowseClient({
                 List
               </button>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-900/10 bg-[#d1e7dd]/80 text-[#051B15]" title="Filters below">
-              <Filter className="h-4 w-4" />
-            </div>
           </div>
         </div>
 
@@ -413,18 +410,6 @@ export function ClassifiedsBrowseClient({
             {CATEGORY_OPTIONS.map((item) => (
               <option key={item.slug} value={item.slug}>
                 {item.name}
-              </option>
-            ))}
-          </select>
-          <span className={cn('ml-2 text-xs font-semibold uppercase tracking-wider', ui.muted)}>Region</span>
-          <select
-            value={region}
-            onChange={(e) => onRegionNavChange(e.target.value)}
-            className={cn('h-10 max-w-[200px] flex-1 rounded-xl px-3 text-sm', ui.input)}
-          >
-            {CLASSIFIED_REGIONS.map((r) => (
-              <option key={r.value || 'all-bd'} value={r.value}>
-                {r.label}
               </option>
             ))}
           </select>

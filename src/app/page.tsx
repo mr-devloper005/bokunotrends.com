@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Armchair, ArrowRight, Bike, Bookmark, Building2, Car, Compass, Cpu, FileText, Globe2, Home, Image as ImageIcon, LayoutGrid, MapPin, Search, ShieldCheck, Smartphone, Sparkles, Tag, User } from 'lucide-react'
+import { Armchair, ArrowRight, Bike, Bookmark, Building2, Car, Cpu, FileText, Globe2, Home, Image as ImageIcon, LayoutGrid, MapPin, Search, ShieldCheck, Smartphone, Tag, User } from 'lucide-react'
 import { ContentImage } from '@/components/shared/content-image'
 import { NavbarShell } from '@/components/shared/navbar-shell'
 import { Footer } from '@/components/shared/footer'
@@ -15,7 +15,6 @@ import { getFactoryState } from '@/design/factory/get-factory-state'
 import { getProductKind, type ProductKind } from '@/design/factory/get-product-kind'
 import type { SitePost } from '@/lib/site-connector'
 import { HOME_PAGE_OVERRIDE_ENABLED, HomePageOverride } from '@/overrides/home-page'
-import { HeroLocationPicker } from '@/components/classifieds/hero-location-picker'
 
 export const revalidate = 300
 
@@ -179,10 +178,6 @@ function DirectoryHome({ primaryTask, enabledTasks, listingPosts, classifiedPost
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#051B15]/95 via-[#051B15]/88 to-[#0a3d2e]/85" />
           <div className="relative mx-auto max-w-5xl px-6 py-14 text-center sm:px-10 sm:py-16 lg:py-20">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-100/95">
-              <Compass className="h-3.5 w-3.5" />
-              Trusted classifieds
-            </span>
             <h1 className="mt-6 text-4xl font-semibold tracking-[-0.04em] text-white sm:text-5xl lg:text-[3.25rem]">
               {isMarket ? 'Sell your home extra products' : 'Search businesses, compare options, and act fast.'}
             </h1>
@@ -192,20 +187,11 @@ function DirectoryHome({ primaryTask, enabledTasks, listingPosts, classifiedPost
                 : SITE_CONFIG.description}
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <Link
-                href="/create/classified"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#00A86B] px-6 py-3 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(0,168,107,0.35)] hover:bg-[#009060]"
-              >
-                <Sparkles className="h-4 w-4" />
-                + Post Ad Now
-              </Link>
               <Link href={primaryTask?.route || '/classifieds'} className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold ${tone.actionAlt}`}>
                 Browse ads
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-            <HeroLocationPicker className="mt-6" />
-
             <form action="/search" method="get" className="mx-auto mt-10 flex max-w-2xl items-center gap-2 rounded-full bg-white p-2 pl-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
               <Search className="h-5 w-5 shrink-0 text-[#051B15]/40" />
               <input name="q" className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm text-[#051B15] outline-none placeholder:text-[#051B15]/45" placeholder="Search to buy" />
