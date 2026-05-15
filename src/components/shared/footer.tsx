@@ -25,7 +25,7 @@ const footerLinks = {
     icon: taskIcons[task.key] || LayoutGrid,
   })),
   company: [
-    { name: 'About', href: '/about' },
+    { name: 'About Us', href: '/about' },
     { name: 'Team', href: '/team' },
     { name: 'Careers', href: '/careers' },
     { name: 'Blog', href: '/blog' },
@@ -80,6 +80,9 @@ export function Footer() {
                 {task.label}
               </Link>
             ))}
+            <Link href="/about" className="rounded-full border border-emerald-900/12 bg-white px-4 py-2 text-sm font-semibold text-[#051B15] shadow-sm hover:border-[#00A86B]/40 hover:text-[#00A86B]">
+              About Us
+            </Link>
             <Link href="/contact" className="rounded-full border border-emerald-900/12 bg-white px-4 py-2 text-sm font-semibold text-[#051B15] shadow-sm hover:border-[#00A86B]/40 hover:text-[#00A86B]">
               Contact Us
             </Link>
@@ -115,12 +118,20 @@ export function Footer() {
                 </Link>
               ) : null}
             </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-4">
               <div>
                 <h3 className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Surfaces</h3>
                 <ul className="mt-4 space-y-3 text-sm text-slate-200">
                   {footerLinks.platform.map((item: any) => (
                     <li key={item.name}><Link href={item.href} className="flex items-center gap-2 hover:text-white">{item.icon ? <item.icon className="h-4 w-4" /> : null}{item.name}</Link></li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Company</h3>
+                <ul className="mt-4 space-y-3 text-sm text-slate-200">
+                  {footerLinks.company.map((item) => (
+                    <li key={item.name}><Link href={item.href} className="hover:text-white">{item.name}</Link></li>
                   ))}
                 </ul>
               </div>

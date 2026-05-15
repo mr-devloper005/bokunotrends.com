@@ -1,7 +1,7 @@
 import { ContentImage } from "@/components/shared/content-image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MapPin, Globe, Phone, Tag, Mail, Clock, User } from "lucide-react";
+import { MapPin, Globe, Phone, Tag, Mail, User } from "lucide-react";
 import { NavbarShell } from "@/components/shared/navbar-shell";
 import { Footer } from "@/components/shared/footer";
 import { TaskPostCard } from "@/components/shared/task-post-card";
@@ -124,24 +124,6 @@ const buildMapEmbedUrl = (
   return null;
 };
 
-const formatRelativeTime = (value?: string | null) => {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-
-  const diffMs = Date.now() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (diffDays <= 0) return "Today";
-  if (diffDays === 1) return "1 day ago";
-  if (diffDays < 30) return `${diffDays} days ago`;
-  const diffMonths = Math.floor(diffDays / 30);
-  if (diffMonths === 1) return "1 month ago";
-  if (diffMonths < 12) return `${diffMonths} months ago`;
-  const diffYears = Math.floor(diffDays / 365);
-  if (diffYears === 1) return "1 year ago";
-  return `${diffYears} years ago`;
-};
-
 const formatPriceLabel = (value: unknown) => {
   if (typeof value === "number" && Number.isFinite(value)) {
     return `₹ ${value.toLocaleString("en-IN")}`;
@@ -205,7 +187,6 @@ export async function TaskDetailPage({ task, slug }: { task: TaskKey; slug: stri
   const hideSidebar = isArticle || task === "image" || isBookmark;
   const isCardLayout = (task === "classified" || task === "listing") && !isArticle && !isBookmark;
   const priceLabel = formatPriceLabel((content as Record<string, unknown>).price);
-  const postedLabel = formatRelativeTime(post.publishedAt || null);
   const sellerName =
     (typeof content.author === "string" && content.author.trim()) || post.authorName || "Seller";
   const related = (await fetchTaskPosts(task, 6))
@@ -468,12 +449,6 @@ export async function TaskDetailPage({ task, slug }: { task: TaskKey; slug: stri
                           {location}
                         </span>
                       ) : null}
-                      {postedLabel ? (
-                        <span className="inline-flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          {postedLabel}
-                        </span>
-                      ) : null}
                     </div>
                     <div className="mt-5 rounded-xl border border-border bg-background/40 p-4">
                       <div className="flex items-start gap-3">
@@ -586,12 +561,6 @@ export async function TaskDetailPage({ task, slug }: { task: TaskKey; slug: stri
 	                  <span className="inline-flex items-center gap-1">
 	                    <MapPin className="h-4 w-4" />
 	                    {location}
-	                  </span>
-	                ) : null}
-	                {postedLabel ? (
-	                  <span className="inline-flex items-center gap-1">
-	                    <Clock className="h-4 w-4" />
-	                    {postedLabel}
 	                  </span>
 	                ) : null}
 	              </div>

@@ -251,7 +251,7 @@ export default function CreateTaskPage() {
       ? values.images.split(",").map((item) => item.trim()).filter(Boolean)
       : [];
 
-    const post = addLocalPost({
+    addLocalPost({
       task: taskKey,
       title,
       summary,
@@ -267,7 +267,7 @@ export default function CreateTaskPage() {
       description: "This post is stored only in your browser.",
     });
 
-    router.push(`/local/${taskKey}/${post.slug}`);
+    setValues({});
   };
 
   return (
@@ -378,7 +378,7 @@ export default function CreateTaskPage() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Button onClick={handleSubmit}>
               <Save className="mr-2 h-4 w-4" />
-              Save locally
+              Save
             </Button>
             <Button variant="ghost" asChild>
               <Link href={taskConfig.route}>
